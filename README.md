@@ -2,7 +2,7 @@
 
 ![simple_shell](https://user-images.githubusercontent.com/41018786/168737732-9b20b421-e3e5-4c45-be75-9ad0791010a1.png)
 
-This project is an implementation of the shell created as the final project for the C code sprint at **ALX Africa**.
+This project is an implementation of the shell created for the C code at **ALX **.
 
 ## Table of contents :clipboard:
 
