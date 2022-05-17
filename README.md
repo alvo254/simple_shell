@@ -1,5 +1,7 @@
 # 0x16. C - Simple Shell
 
+![simple_shell](https://user-images.githubusercontent.com/41018786/168737732-9b20b421-e3e5-4c45-be75-9ad0791010a1.png)
+
 This project is an implementation of the shell created as the final project for the C code sprint at **ALX Africa**.
 
 ## Table of contents :clipboard:
