@@ -3,74 +3,99 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
+#include <string.h>
+#include <dirent.h>
 #include <errno.h>
-#include <signal.h>
 #include <sys/wait.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 
+/* this just does in one line: free(x); x = NULL; */
+#define FREE(x) (x = (free(x), NULL))
+#define PROMPT "Ship$ "
+/* structs */
 /**
- * @brief prompt character and color style
- * the \033[ way
- * usage: WAY RED to print red
- * usage: WAY B CYN bold cyan
- */
-#define PROMPT "$ "
-#define WAY "\033["
-#define DEF "0m"
-#define BLK "30m"
-#define RED "31m"
-#define GRN "32m"
-#define YLW "33m"
-#define BLU "34m"
-#define MAG "35m"
-#define CYN "36m"
-#define WHI "37m"
-#define B "1;"
-#define BRAND WAY B CYN 
-#define RESET WAY DEF
+  * struct order - struct to contain &&'s and ||'s
+  * @n: coded int, 1 = ; , 2 = && , 3 = ||
+  * @next: points to the next node
+  */
+typedef struct order
+{
+	unsigned int n;
+	struct order *next;
+} order_t;
+/**
+  * struct env_list - struct to contain env
+  * @name: name of env var
+  * @value: value of env var
+  * @next: points to the next node
+  */
+typedef struct env_list
+{
+	char *name;
+	char *value;
+	struct env_list *next;
+} env_list_t;
 
-/*delimiter */
-#define ENVDELIM ":="
+/* getline */
+int _getline(char **lineptr, size_t *n, FILE *stream);
 
-/* lifetime cicle */
-char *read_line(void);
-char **tokenize(char *line);
-char **set_env(char **envp);
-char *_getenv(const char *name, char **envp);
-char **fullpath(char *path, char *envdelim);
-int hsh_execute(char **args, char **directories);
-int hsh_runcomand(char **args, char **pathparsed);
+/* memory helpers */
+void *_realloc(void *ptr, unsigned int old_size, unsigned int new_size);
 
-/* child processes */
-int launch_child(char **args, char **directories);
-int hsh_runcomand(char **args, char **directories);
-
-/* BUILT-INS */
-int hsh_cd(char **args);
-int hsh_help(void);
-int hsh_exit(void);
-
-/* string functions */
-char *_strcat(char *str1, char *str2);
-int _puts(char *string);
-int _putchar(char c);
-int word_count(char *str);
+/* string helpers */
+int _atoi(char *s);
 int _strlen(char *str);
+char *_strdup(char *str);
 int _strcmp(char *s1, char *s2);
 char *_strcpy(char *dest, char *src);
-int _worddelimcount(char *string, char delim);
+char *_strcat(char *dest, char *src);
+char *_strtok(char *buffer, const char *delim);
+char *_strchr(char *s, char c);
+void _puts(char *str);
+void puts_prompt(void);
+int _putchar(char c);
+void _puts_int(int n);
+int MATH_pow(int base, int exp);
 
-/* custom functions */
-char *_getline(void);
+/* cmd_handler */
+int cmd_handler(char **argv, env_list_t **env);
+int built_in_handler(char **argv, env_list_t **env, int i);
+int _cd(char **argv, env_list_t **env);
+void do_nothing(int nothing);
 
-/* helper functions */
-void handle_ctrlc(int n);
+/* cmd assembly */
+char **get_tokens(char *str_tok, char *delim);
+int isin_dir(char *term, char *dir);
+char *whitcher(char *cmd, env_list_t **env);
+void rem_comments(char *str);
+void double_free(char **argv);
 
-#endif
+/* env variable */
+char **_initenv(void);
+void _setenv(char **argv, char ***env);
+void _unsetenv(char *entry, char ***env);
+char *_getenv(char *entry, char ***env);
+void _printenv(char ***env);
+
+/* env_list */
+env_list_t **_initenv_list(void);
+void printenv_list(env_list_t **env);
+char *_getenv_list_value(char *name, env_list_t **env);
+env_list_t *_getenv_list_node(char *name, env_list_t **env);
+void _setenv_list(char **argv, env_list_t **env);
+void free_env_list_node(env_list_t *node);
+void _unsetenv_list(char **argv, env_list_t **env);
+void free_env_list(env_list_t **env);
+char **_get_str_env(env_list_t **env);
+
+/* ops */
+void *op_push_end(order_t **ops, int n);
+char **_get_cmds(char *line, order_t **ops);
+void free_ops(order_t **ops);
+
+extern char **environ;
+extern int *LINE_COUNT;
+extern char **FNC_NAME;
+#endif /* SHELL */
