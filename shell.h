@@ -1,61 +1,76 @@
 #ifndef SHELL_H
 #define SHELL_H
 
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <unistd.h>
 #include <sys/types.h>
-#include <sys/wait.h>
 #include <sys/stat.h>
-#include <time.h>
-#include <stdbool.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <signal.h>
+#include <sys/wait.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
 
-/* environment variables */
-extern char **environ;
-extern __sighandler_t signal(int __sig, __sighandler_t __handler);
+/**
+ * @brief prompt character and color style
+ * the \033[ way
+ * usage: WAY RED to print red
+ * usage: WAY B CYN bold cyan
+ */
+#define PROMPT "$ "
+#define WAY "\033["
+#define DEF "0m"
+#define BLK "30m"
+#define RED "31m"
+#define GRN "32m"
+#define YLW "33m"
+#define BLU "34m"
+#define MAG "35m"
+#define CYN "36m"
+#define WHI "37m"
+#define B "1;"
+#define BRAND WAY B CYN 
+#define RESET WAY DEF
 
-/* handle built ins */
-int checker(char **cmd, char *buf);
-void prompt_user(void);
-void handle_signal(int m);
-char **tokenizer(char *line);
-char *test_path(char **path, char *command);
-char *append_path(char *path, char *command);
-int handle_builtin(char **command, char *line);
-void exit_cmd(char **command, char *line);
+/*delimiter */
+#define ENVDELIM ":="
 
-void print_env(void);
+/* lifetime cicle */
+char *read_line(void);
+char **tokenize(char *line);
+char **set_env(char **envp);
+char *_getenv(const char *name, char **envp);
+char **fullpath(char *path, char *envdelim);
+int hsh_execute(char **args, char **directories);
+int hsh_runcomand(char **args, char **pathparsed);
 
-/* string handlers */
+/* child processes */
+int launch_child(char **args, char **directories);
+int hsh_runcomand(char **args, char **directories);
+
+/* BUILT-INS */
+int hsh_cd(char **args);
+int hsh_help(void);
+int hsh_exit(void);
+
+/* string functions */
+char *_strcat(char *str1, char *str2);
+int _puts(char *string);
+int _putchar(char c);
+int word_count(char *str);
+int _strlen(char *str);
 int _strcmp(char *s1, char *s2);
-int _strlen(char *s);
-int _strncmp(char *s1, char *s2, int n);
-char *_strdup(char *s);
-char *_strchr(char *s, char c);
+char *_strcpy(char *dest, char *src);
+int _worddelimcount(char *string, char delim);
 
-void execution(char *cp, char **cmd);
-char *find_path(void);
+/* custom functions */
+char *_getline(void);
 
-/* helper function for efficient free */
-void free_buffers(char **buf);
+/* helper functions */
+void handle_ctrlc(int n);
 
-struct builtin
-{
-	char *env;
-	char *exit;
-} builtin;
-
-struct info
-{
-	int final_exit;
-	int ln_count;
-} info;
-
-struct flags
-{
-	bool interactive;
-} flags;
-
-#endif /* SHELL_H */
+#endif
